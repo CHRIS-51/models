@@ -1,0 +1,46 @@
+---
+title: "PML"
+author: "Chris Hill"
+date: "May 24, 2015"
+output: html_document
+---
+
+```{r}
+setwd ("/Users/chris/imac/school/johns-hopkins/machine-learning/")
+library (caret);library(ggplot2)
+options(max.print=100)
+set.seed  (4444)
+pm <- read.csv (file="pml-training.csv",head=TRUE,sep=",")
+pm <- pm[,8:160]
+col <- colSums (is.na(pm)) < 1
+pm <- pm[,col]
+nzv = nearZeroVar (pm)
+pm = pm[,-nzv]
+ndx <- createDataPartition(pm$classe, p=0.70, list=FALSE)
+pml <- pm[ndx,]
+pmlv <- pm[-ndx,]
+dim (pml)
+test <- read.csv (file="pml-testing.csv",head=TRUE,sep=",")
+test <- test[,8:160]; test <- test[,col]; test <- test[,-nzv]
+dim (test)
+# train_control <- trainControl(method="cv", number=3)
+# model.rf.cv <- train (pml$classe ~ ., data=pml, method="rf", trControl=train_control)
+# model.treebag <- train (pml$classe ~ ., data=pml, method="treebag")
+# confusionMatrix(pml$classe,predict(model.treebag,pml[,1:52]))
+# confusionMatrix(pmlv$classe,predict(model.treebag,pmlv[,1:52]))
+model.rf <- train (pml$classe ~ ., data=pml, method="rf")
+confusionMatrix(pml$classe,predict(model.rf,pml[,1:52]))
+confusionMatrix(pmlv$classe,predict(model.rf,pmlv[,1:52]))
+predict.test.rf <- predict(model.rf,test[,1:52])
+predict.test.rf
+
+```
+
+You can also embed plots, for example:
+
+```{r, echo=TRUE}
+varImp(model.rf)
+qplot(pml$yaw_belt, pml$roll_belt, col=classe,data=pml)
+```
+
+Note that the `echo = TRUE` parameter was added to the code chunk to show the R code that generated the plot.
