@@ -1,0 +1,146 @@
+<!DOCTYPE HTML>
+<html>
+<pre>
+
+R version 3.2.0 (2015-04-16) -- "Full of Ingredients"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> setwd ("/Users/chris/imac/school/johns-hopkins/machine-learning/")
+> library (caret);library(ggplot2)
+Loading required package: lattice
+Loading required package: ggplot2
+> options(max.print=100)
+> set.seed  (4444)
+> pm <- read.csv (file="pml-training.csv",head=TRUE,sep=",")
+> pm <- pm[,8:160]
+> col <- colSums (is.na(pm)) < 1
+> pm <- pm[,col]
+> nzv = nearZeroVar (pm)
+> pm = pm[,-nzv]
+> ndx <- createDataPartition(pm$classe, p=0.70, list=FALSE)
+> pml <- pm[ndx,]
+> pmlv <- pm[-ndx,]
+> dim (pml)
+[1] 13737    53
+> test <- read.csv (file="pml-testing.csv",head=TRUE,sep=",")
+> test <- test[,8:160]; test <- test[,col]; test <- test[,-nzv]
+> dim (test)
+[1] 20 53
+> model.rf <- train (pml$classe ~ ., data=pml, method="rf")
+Loading required package: randomForest
+randomForest 4.6-10
+Type rfNews() to see new features/changes/bug fixes.
+> confusionMatrix(pml$classe,predict(model.rf,pml[,1:52]))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 3906    0    0    0    0
+         B    0 2658    0    0    0
+         C    0    0 2396    0    0
+         D    0    0    0 2252    0
+         E    0    0    0    0 2525
+
+Overall Statistics
+                                     
+               Accuracy : 1          
+                 95% CI : (0.9997, 1)
+    No Information Rate : 0.2843     
+    P-Value [Acc > NIR] : < 2.2e-16  
+                                     
+                  Kappa : 1          
+ Mcnemar's Test P-Value : NA         
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            1.0000   1.0000   1.0000   1.0000   1.0000
+Specificity            1.0000   1.0000   1.0000   1.0000   1.0000
+Pos Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+Neg Pred Value         1.0000   1.0000   1.0000   1.0000   1.0000
+Prevalence             0.2843   0.1935   0.1744   0.1639   0.1838
+Detection Rate         0.2843   0.1935   0.1744   0.1639   0.1838
+Detection Prevalence   0.2843   0.1935   0.1744   0.1639   0.1838
+Balanced Accuracy      1.0000   1.0000   1.0000   1.0000   1.0000
+> confusionMatrix(pmlv$classe,predict(model.rf,pmlv[,1:52]))
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1673    0    0    0    1
+         B    9 1127    3    0    0
+         C    0   13 1010    3    0
+         D    0    0   17  947    0
+         E    0    0    0    2 1080
+
+Overall Statistics
+                                         
+               Accuracy : 0.9918         
+                 95% CI : (0.9892, 0.994)
+    No Information Rate : 0.2858         
+    P-Value [Acc > NIR] : < 2.2e-16      
+                                         
+                  Kappa : 0.9897         
+ Mcnemar's Test P-Value : NA             
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9946   0.9886   0.9806   0.9947   0.9991
+Specificity            0.9998   0.9975   0.9967   0.9966   0.9996
+Pos Pred Value         0.9994   0.9895   0.9844   0.9824   0.9982
+Neg Pred Value         0.9979   0.9973   0.9959   0.9990   0.9998
+Prevalence             0.2858   0.1937   0.1750   0.1618   0.1837
+Detection Rate         0.2843   0.1915   0.1716   0.1609   0.1835
+Detection Prevalence   0.2845   0.1935   0.1743   0.1638   0.1839
+Balanced Accuracy      0.9972   0.9930   0.9886   0.9957   0.9993
+> predict.test.rf <- predict(model.rf,test[,1:52])
+> predict.test.rf
+ [1] B A B A A E D B A A B C B A E E A B B B
+Levels: A B C D E
+> qplot(pml$yaw_belt, pml$roll_belt, col=classe,data=pml)
+> varImp(model.rf)
+rf variable importance
+
+  only 20 most important variables shown (out of 52)
+
+                     Overall
+roll_belt             100.00
+yaw_belt               83.75
+magnet_dumbbell_z      71.23
+pitch_belt             65.86
+magnet_dumbbell_y      65.73
+pitch_forearm          65.08
+roll_forearm           54.91
+magnet_dumbbell_x      53.68
+accel_belt_z           49.42
+magnet_belt_z          47.61
+magnet_belt_y          46.09
+roll_dumbbell          45.52
+accel_dumbbell_y       45.05
+accel_dumbbell_z       40.31
+roll_arm               37.05
+accel_forearm_x        34.83
+gyros_belt_z           33.08
+accel_dumbbell_x       31.52
+total_accel_dumbbell   31.25
+yaw_dumbbell           30.92
+> qplot(pml$yaw_belt, pml$roll_belt, col=classe,data=pml)
+
+</pre>
+</html>
