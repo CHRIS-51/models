@@ -38,15 +38,14 @@ Trial #7: nb (naive bayes) accuracy: 76.38% on the same 60/40 split
 <br>
 Trial #8: rf accuracy: 99.4% on the training set with a 50/50 split and seed set to 4444.
 <br>
-Trial #9: rf accuracy: <B>99.18%</B> on the training set with a 70/30 split and seed set to 4444.
+Trial #9: rf accuracy: <B>99.18%</B> on the training set for an out of sample error of .0082 using a 70/30 split and seed set to 4444.
 <br>
 Trial #10: treebag accuracy: 98.71% on the training set with a 70/30 split and seed set to 883388.
 <p>
 Ran explicit cross-validation by applying this control to my training:
 trainControl(method="cv", number=3) (although rf does this by
-default) to quantify error, which gave an out of sample error of
-0.0075 (1-.9925). Given only 5 categories and almost 20000 examples,
-one might suspect overfitting, but this has been accounted for in the model.
+default). Given only 5 categories and almost 20000 examples,
+one might suspect overfitting, but this has been accounted for automatically by the model.
   <p>The table shows the most important variables in the rf model 2 of which are shown in the plot, yaw_belt and roll_belt colored by classe</p>
 Applying the rf and treebag to the test dataset, the models predicted 20/20 classes correctly.
 </body>
